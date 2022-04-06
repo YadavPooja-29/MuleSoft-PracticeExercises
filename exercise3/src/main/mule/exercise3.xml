@@ -1,1 +1,26 @@
-
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+<http:listener-config name="HTTP_Listener_config1" doc:name="HTTP Listener config" doc:id="4e5aab15-de06-47de-9556-abd9a3fd92c8">
+<http:listener-connection host="localhost" port="8081"/>
+</http:listener-config>
+<db:config name="Database_Config1" doc:name="Database Config" doc:id="9b91b257-0c6a-4238-be3e-bd8ba35f0368">
+<db:my-sql-connection host="localhost" port="3306" user="root" password="yadavpooja_29" database="training"/>
+</db:config>
+<flow name="exercise3Flow" doc:id="d73d7099-6dc2-4b17-b5c9-702cb578e876">
+<http:listener doc:name="Listener" doc:id="627abfc0-f5ef-41b7-9b73-52936c36938f" config-ref="HTTP_Listener_config1" path="/flights"/>
+<db:select doc:name="Select" doc:id="d0bec58c-c4a5-4e7c-9366-3653ef957f15" config-ref="Database_Config1">
+<db:sql>
+<![CDATA[ SELECT * FROM american WHERE id = :ID ]]>
+</db:sql>
+<db:input-parameters>
+<![CDATA[ #[{'ID' : attributes.queryParams.id}] ]]>
+</db:input-parameters>
+</db:select>
+<ee:transform doc:name="Transform Message" doc:id="4af54cd2-2932-4ed7-b58f-26ad955b79a3">
+<ee:message>
+<ee:set-payload>
+<![CDATA[ %dw 2.0 output application/json --- payload map ( payload01 , indexOfPayload01 ) -> { ID: (attributes.uriParams.ID default 0) + (payload01.ID default 0), code: payload01.code2 default "", price: payload01.price default 0, departureDate: payload01.takeOffDate as String default "", destination: payload01.toAirport default "", emptySeats: payload01.seatAvailable default 0, plane: { totalSeats: payload01.totalSeats default 0 } } ]]>
+</ee:set-payload>
+</ee:message>
+</ee:transform>
+</flow>
+</mule>

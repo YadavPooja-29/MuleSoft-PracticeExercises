@@ -1,1 +1,100 @@
-
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+<http:listener-config name="HTTP_Listener_configuration1" doc:name="HTTP Listener config" doc:id="b076a82f-91e1-4a94-8964-6712c91b2f42">
+<http:listener-connection host="localhost" port="8081"/>
+</http:listener-config>
+<http:listener-config name="HTTP_Listener_configuration2" doc:name="HTTP Listener config" doc:id="0117fc65-9163-4960-9a27-3fb8a4d22871">
+<http:listener-connection host="localhost" port="8082"/>
+</http:listener-config>
+<db:config name="Database_Configuration1" doc:name="Database Config" doc:id="7787ccb7-578f-486f-9867-7e3e6246ddb8">
+<db:my-sql-connection host="mudb.learn.mulesoft.com" port="3306" user="mule" password="mule" database="training"/>
+</db:config>
+<http:listener-config name="HTTP_Listener_configuration5" doc:name="HTTP Listener config" doc:id="5710129c-731a-4c12-8157-f6fd99df84b5">
+<http:listener-connection host="localhost" port="8085"/>
+</http:listener-config>
+<db:config name="Database_Configuration4" doc:name="Database Config" doc:id="d43e527c-5f80-44d9-b589-6a69fc47caed">
+<db:my-sql-connection host="localhost" port="3306" user="root" password="yadavpooja_29" database="mulesoft"/>
+</db:config>
+<http:listener-config name="HTTP_Listener_configuration6" doc:name="HTTP Listener config" doc:id="a3db63f7-dcef-4293-9e4b-05d8643c3059">
+<http:listener-connection host="localhost" port="8086"/>
+</http:listener-config>
+<db:config name="Database_Configuration5" doc:name="Database Config" doc:id="aec04db7-a2c7-40f5-ae28-2128d0120373">
+<db:my-sql-connection host="localhost" port="3306" user="root" password="yadavpooja_29" database="mulesoft"/>
+</db:config>
+<http:listener-config name="HTTP_Listener_configuration3" doc:name="HTTP Listener config" doc:id="2b4e832f-7d10-4ebd-8cb7-73160cb4173b">
+<http:listener-connection host="0.0.0.0" port="8086"/>
+</http:listener-config>
+<db:config name="Database_Configuration2" doc:name="Database Config" doc:id="f57d9bcf-57db-4c10-a47d-9d95338d2c6b">
+<db:my-sql-connection host="localhost" port="3306" user="root" password="yadavpooja_29" database="training"/>
+</db:config>
+<flow name="mule-excerisesFlow1" doc:id="28b469c4-f141-4310-9b9f-e18e9ba4ea48">
+<http:listener doc:name="Listener" doc:id="0cdc200e-82f6-4310-a240-a6c8f4b3805d" config-ref="HTTP_Listener_configuration1" path="/flights1"/>
+<logger level="INFO" doc:name="Logger" doc:id="85eae0b4-21dd-412b-ab6d-eb61a39d5a66"/>
+<set-payload value="Flight Info" doc:name="Set Payload" doc:id="3511fc23-7a21-4491-b495-5696e7f6855e"/>
+</flow>
+<flow name="mule-excerisesFlow2" doc:id="ec59fb56-89e1-474c-9d00-4c6b77436511">
+<http:listener doc:name="Listener" doc:id="867395dc-7fda-425d-90df-3467f266f3a1" config-ref="HTTP_Listener_configuration2" path="/flights2"/>
+<db:select doc:name="Select" doc:id="b57bd221-aefd-4a86-81aa-425a37b16678" config-ref="Database_Configuration1">
+<db:sql>
+<![CDATA[ SELECT * FROM american; ]]>
+</db:sql>
+</db:select>
+<ee:transform doc:name="Transform Message" doc:id="06fb8f4a-1b7a-45e4-87df-81eef45558b8">
+<ee:message>
+<ee:set-payload>
+<![CDATA[ %dw 2.0 output application/json --- payload map ( payload01 , indexOfPayload01 ) -> { ID: payload01.ID, code: (payload01.code1 default "") ++ (payload01.code2 default ""), price: payload01.price default 0, departureDate: payload01.takeOffDate as String default "", origin: payload01.fromAirport default "", destination: payload01.toAirport default "", emptySeats: payload01.seatsAvailable default 0, plane: { "type": payload01.planeType default "", totalSeats: payload01.totalSeats default 0 } } ]]>
+</ee:set-payload>
+</ee:message>
+</ee:transform>
+</flow>
+<flow name="mule-excerisesFlow3" doc:id="bd8533d9-d834-4fdb-9b8a-afbe76fff874">
+<http:listener doc:name="Listener" doc:id="a1a9094d-9b55-418f-aaed-89b298c42eac" config-ref="HTTP_Listener_configuration3" path="/flights3"/>
+<db:select doc:name="Select" doc:id="0186905e-5080-404d-bf35-70d4d1ceeede" config-ref="Database_Configuration2">
+<db:sql>
+<![CDATA[ SELECT * FROM American WHERE id = :ID ]]>
+</db:sql>
+<db:input-parameters>
+<![CDATA[ #[{'ID' : attributes.queryParams.id}] ]]>
+</db:input-parameters>
+</db:select>
+<ee:transform doc:name="Transform Message" doc:id="7598dcd5-4905-40a4-bb95-ef5f2068ac9e">
+<ee:message>
+<ee:set-payload>
+<![CDATA[ %dw 2.0 output application/json --- payload map ( payload01 , indexOfPayload01 ) -> { ID: (attributes.uriParams.ID default 0) + (payload01.ID default 0), code: payload01.code2 default "", price: payload01.price default 0, departureDate: payload01.takeOffDate as String default "", destination: payload01.toAirport default "", emptySeats: payload01.seatAvailable default 0, plane: { totalSeats: payload01.totalSeats default 0 } } ]]>
+</ee:set-payload>
+</ee:message>
+</ee:transform>
+</flow>
+<flow name="mule-excerisesFlow5" doc:id="cc4b6fa9-e878-4743-a7e7-a86a1962ac0b">
+<http:listener doc:name="Listener" doc:id="3f0d0294-bf27-499f-a1f1-10ef8eec2aba" config-ref="HTTP_Listener_configuration5" path="/users"/>
+<db:select doc:name="Select" doc:id="f2ea8a45-0bb9-4a35-a943-2387c8222fb3" config-ref="Database_Configuration4">
+<db:sql>
+<![CDATA[ select * from user; ]]>
+</db:sql>
+</db:select>
+<ee:transform doc:name="Transform Message" doc:id="20d697e0-1fd5-490e-9101-828e614e9faf">
+<ee:message>
+<ee:set-payload>
+<![CDATA[ %dw 2.0 output application/json --- payload ]]>
+</ee:set-payload>
+</ee:message>
+</ee:transform>
+</flow>
+<flow name="mule-excerisesFlow6" doc:id="b1f158c8-a99e-46e1-8b4b-5b17bcb197df">
+<http:listener doc:name="Listener" doc:id="5c13ee10-4f26-461e-af3f-76894bf45b54" config-ref="HTTP_Listener_configuration6" path="/users"/>
+<db:select doc:name="Select" doc:id="e7788435-a943-4130-aec8-2be74e66b1d6" config-ref="Database_Configuration5">
+<db:sql>
+<![CDATA[ select * from user where fname =:name ]]>
+</db:sql>
+<db:input-parameters>
+<![CDATA[ #[{'name' : attributes.uriParams.name}] ]]>
+</db:input-parameters>
+</db:select>
+<ee:transform doc:name="Transform Message" doc:id="56ea467a-5aa4-4030-9e08-a904242c948d">
+<ee:message>
+<ee:set-payload>
+<![CDATA[ %dw 2.0 output application/json --- payload ]]>
+</ee:set-payload>
+</ee:message>
+</ee:transform>
+</flow>
+</mule>

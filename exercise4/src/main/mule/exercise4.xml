@@ -1,0 +1,44 @@
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="7c25da53-f04a-430a-8ca0-4ddbe73222d7">
+<http:listener-connection host="localhost" port="8081"/>
+</http:listener-config>
+<db:config name="Database_Config1" doc:name="Database Config" doc:id="65c086c1-413e-48a7-84ed-ecc7635f9b62">
+<db:my-sql-connection host="localhost" port="3306" user="root" password="yadavpooja_29" database="training"/>
+</db:config>
+<db:config name="Database_Config" doc:name="Database Config" doc:id="ac263acc-18d8-4636-8a6e-d4e5662e96fa">
+<db:my-sql-connection host="localhost" port="3306" user="root" password="yadavpooja_29" database="training"/>
+</db:config>
+<flow name="exercise4Flow" doc:id="deee2506-bfac-4976-9f77-fa3a23c928cc">
+<http:listener doc:name="Listener" doc:id="6d7a12f7-5f23-4cfc-ba63-5c964138354d" config-ref="HTTP_Listener_config" path="/flights" allowedMethods="POST"/>
+<db:insert doc:name="Insert" doc:id="de331fc0-2ab0-4ddb-84c8-f0c4f9e2a8a1" config-ref="Database_Config">
+<db:sql>
+<![CDATA[ insert into flight(flightID,flightName) values(:flight_ID,:flight_Name); ]]>
+</db:sql>
+<db:input-parameters>
+<![CDATA[ #[{'flight_ID':payload.ID, 'flight_Name':payload.Name }] ]]>
+</db:input-parameters>
+</db:insert>
+<ee:transform doc:name="Transform Message" doc:id="957fd3db-f9e7-4e9c-9fde-fc84bd1ba68c">
+<ee:message>
+<ee:set-payload>
+<![CDATA[ %dw 2.0 output application/json --- {"message": "Flight virtually added"} ]]>
+</ee:set-payload>
+</ee:message>
+</ee:transform>
+</flow>
+<flow name="exercise4Flow1" doc:id="cf6cb074-0f80-45ea-a6a6-4efda670d7df">
+<http:listener doc:name="Listener" doc:id="c1368143-dc58-4117-916b-751d250f3e65" config-ref="HTTP_Listener_config" path="/Allflights" allowedMethods="POST"/>
+<db:select doc:name="Select" doc:id="49d63020-b633-4bfd-b69a-1c5d23697f68" config-ref="Database_Config1">
+<db:sql>
+<![CDATA[ select * from flight; ]]>
+</db:sql>
+</db:select>
+<ee:transform doc:name="Transform Message" doc:id="caa3a5b3-4306-4bf0-b19b-623387e9b90b">
+<ee:message>
+<ee:set-payload>
+<![CDATA[ %dw 2.0 output application/json --- payload ]]>
+</ee:set-payload>
+</ee:message>
+</ee:transform>
+</flow>
+</mule>

@@ -1,1 +1,1 @@
-# MuleSoft-PracticeExercises
+# MuleSoft Practice Exercises

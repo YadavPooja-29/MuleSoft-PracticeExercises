@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_configuration" doc:name="HTTP Listener config" doc:id="a63e69b9-b5d4-4863-8fdd-caf7fa29ce5e" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="mule-helloworldFlow" doc:id="98745f31-8c55-42f6-9d80-7d21aa24fc3e" >
+		<http:listener doc:name="HTTP Listener" doc:id="02e2a17f-168d-40fb-8b00-7d5d5bda3934" path="/sayhello" config-ref="HTTP_Listener_configuration"/>
+		<logger level="INFO" doc:name="Log Request" doc:id="617bf0b5-7f5c-4af5-913e-979dd3383a31" message="Entering into HelloWorld API :: Hello Pooja Yadav"/>
+		<set-payload value="Hello, Pooja Yadav. Welcome to Mulesoft API" doc:name="Set Payload" doc:id="ed52abb1-af63-4a1e-a3bb-579e8eb043fa" />
+		<logger level="INFO" doc:name="Log Response" doc:id="b8d3cd29-8ea0-4df9-a72c-1348762fd307" message="#[payload]"/>
+	</flow>
+</mule>

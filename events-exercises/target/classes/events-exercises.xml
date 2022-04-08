@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_configuration" doc:name="HTTP Listener config" doc:id="3ec2065c-9484-4281-839c-27ddfaaf69f0" >
+		<http:listener-connection host="localhost" port="8081" />
+	</http:listener-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP_Listener_config" doc:id="c4916f67-6740-4018-991e-6f45bbc0b7c0" >
+		<http:listener-connection host="localhost" port="8082"/>
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP_Request_configuration" doc:id="7e294455-88c3-4f41-92d7-926ea76296b7" >
+		<http:request-connection host="localhost" port="8082"/>
+	</http:request-config>
+	<flow name="events-exercisesFlow" doc:id="85e63c05-6764-4c89-8c2e-ceab05b3cae4" >
+		<http:listener doc:name="GET /customerInfo" doc:id="8df122b0-1288-4b1b-88aa-488bc66cda7a" config-ref="HTTP_Listener_configuration" path="/getCustomerInfo" allowedMethods="GET">
+			<http:response reasonPhrase="Success" >
+				<http:headers ><![CDATA[#[output application/java
+---
+{
+	"customerName" : attributes.queryParams.customerName,
+	"customerLocation" : attributes.queryParams.customerLocation
+}]]]></http:headers>
+			</http:response>
+		</http:listener>
+		<set-payload value="#[('Welcome ') ++ '' ++ (attributes.queryParams.customerName) ++ ('. Your location is ') ++ (attributes.queryParams.customerLocation default 'India') ++ '.']" doc:name="Payload" doc:id="eb3999e1-f422-4c48-8bae-cf4b0be88fed" />
+		<logger level="INFO" doc:name="Logger" doc:id="23cbb16f-4e36-45b6-897d-4d537c61071a" message="Welcome #[attributes.queryParams.customerName default 'Pooja']. Your location is #[attributes.queryParams.customerLocation default 'India']."/>
+	</flow>
+	<flow name="events-exercise4Flow" doc:id="383aca04-1692-42f2-934f-6532b0dbaddb" >
+		<http:listener doc:name="Listener" doc:id="9c938e93-3b6e-4b8d-b61e-15345c2b00d8" config-ref="HTTP_Listener_config" path="/getCustomerInfo" allowedMethods="GET"/>
+		<set-variable value="#[attributes.queryParams.customerName]" doc:name="Set firstName" doc:id="2c6e9c75-5edb-4c52-ba7e-c24ffdd6d020" variableName="firstName"/>
+		<set-payload value="#[upper('Welcome ') ++ '' ++ upper(attributes.queryParams.customerName) ++ upper('. Your location is ') ++ upper(attributes.queryParams.customerLocation default 'India') ++ '.']" doc:name="Display" doc:id="0534413f-ebbf-41c3-8e0c-6053665df64d" />
+		<logger level="INFO" doc:name="Logger" doc:id="fb18629a-4378-4539-918c-7117782f028e" message="Welcome #[vars.firstName]. Your location is #[attributes.queryParams.customerLocation default 'India']."/>
+	</flow>
+</mule>

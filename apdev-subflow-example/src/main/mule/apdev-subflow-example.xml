@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="d946c8ad-3ce6-49d3-bb6d-22e09f1b9e76" >
+		<http:request-connection host="localhost" port="8081" connectionIdleTimeout="300000" />
+	</http:request-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="a1d70971-99ca-4b52-8fb1-bbea4e264190" >
+		<http:listener-connection host="localhost" port="8082" />
+	</http:listener-config>
+	<vm:config name="VM_Config" doc:name="VM Config" doc:id="ddb56606-85eb-4578-a9a0-0cb08c4c71aa" >
+		<vm:queues >
+			<vm:queue queueName="goodbye" />
+		</vm:queues>
+	</vm:config>
+	<flow name="helloFlow" doc:id="88b98c5a-69ab-40fe-a712-e6ee013679e2" >
+		<http:listener doc:name="GET /hello" doc:id="eee804fb-4d2f-4357-a17d-42a303f334ee" path="/hello" allowedMethods="GET" config-ref="HTTP_Listener_config">
+			<http:response reasonPhrase="Success">
+				<http:headers ><![CDATA[#[output application/java
+---
+{
+	"fname" : attributes.queryParams.firstname
+}]]]></http:headers>
+			</http:response>
+		</http:listener>
+		<flow-ref doc:name="subflow" doc:id="7fc40627-7298-42bb-8c7f-2fbd69a0c820" name="subflow"/>
+		<flow-ref doc:name="privateFlow" doc:id="3ad731f1-410e-4a48-bd7c-f59033ee6776" name="helloFlow"/>
+		<logger level="INFO" doc:name="Logger" doc:id="fa55db29-fdd9-44c0-a548-60c585c09bfd" message="#['\nMessage: '++ payload]"/>
+	</flow>
+	<sub-flow name="subflow" doc:id="b73aa489-568a-425d-8611-efd714931dfd" >
+		<set-variable value="attributes.queryParams.firstname" doc:name="firstname" doc:id="a27e6731-82a3-43d7-b55d-751e925e29cf" variableName="fname"/>
+		<set-payload value="#['Hello' ++ vars.fname]" doc:name="Set Payload" doc:id="40e5bf46-667f-4a5e-8184-dcaf904f3c0d" />
+	</sub-flow>
+	<flow name="privateFlow" doc:id="cf68d5f7-afaa-4444-b077-684227c0c7d7" initialState="stopped" tracking:enable-default-events="true">
+		<http:request method="GET" doc:name="Request" doc:id="60611496-0a69-46f5-a6fc-b724fb401b90" config-ref="HTTP_Request_configuration" path="/goodbye"/>
+	</flow>
+</mule>

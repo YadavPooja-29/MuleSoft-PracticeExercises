@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config">
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<vm:config name="VM_Config" doc:name="VM Config">
+		<vm:queues >
+			<vm:queue queueName="myQueue" />
+		</vm:queues>
+	</vm:config>
+	<flow name="vm-publishingFlow" doc:id="8c98212c-9b95-48e8-889c-bccd05f2672f">
+  <http:listener doc:name="Listener" allowedMethods="POST" config-ref="HTTP_Listener_config" path="/json-here" />
+  <vm:publish queueName="myQueue" config-ref="VM_Config" doc:name="publish-consume">
+    <vm:content>#[payload]</vm:content>
+  </vm:publish>
+  <set-payload value="Welcome to the Publish VM Connector" doc:name="Set Payload" doc:id="37a589fe-7383-45d3-b136-31c1540c6f62" />
+		<logger message="Welcome to the Publish VM Connector" level="INFO"/>
+</flow>
+	<flow name="vm-listeningFlow" doc:id="88f8becb-c479-425f-8a17-5f5e81f43d1f">
+  <vm:listener queueName="myQueue" config-ref="VM_Config">
+    <vm:response>
+      <vm:content><![CDATA[#[
+                    %dw 2.0
+                    output application/json
+                    ---
+                    {
+                    	"origin": "Awesome Mule 4 VM connector",
+                      "body" : payload
+                    }]
+                 ]]>
+      </vm:content>
+    </vm:response>
+  </vm:listener>
+  <set-payload value="Welcome to the Listener VM Connector" doc:name="Set Payload" doc:id="bf6fd87f-63d5-4c6d-b05d-342d93ae55b1" />
+		<logger level="INFO" doc:name="Logger" doc:id="77bcfc5e-3789-48a3-81e9-a22ca8d09324" message="Welcome to the Listener VM Connector"/>
+		<flow-ref name="theIntegrationLogic" doc:id="32e4c61a-a713-4fe5-866e-de9f40352403"/>
+</flow>
+	<flow name="theIntegrationLogic" doc:id="aae19b7d-e600-479f-abb3-b7e9c92116fb">
+		<http:listener doc:name="theIntegrationLogic" doc:id="278270b5-710b-41b4-a8fb-77dab401c719" config-ref="HTTP_Listener_config" path="/json-here" allowedMethods="POST" />
+		<set-payload value="Hello, Pooja Yadav. Welcome to Mule 4 VM connector" doc:name="Set Payload" doc:id="45b34958-2985-4e66-83c3-328a2151f030" />
+		<logger level="INFO" doc:name="Logger" doc:id="f3a2e427-36f0-4204-8fe3-b1a1c87604c0" message="Hello, Welcome to Mule 4 VM connector" />
+	</flow>
+
+</mule>
